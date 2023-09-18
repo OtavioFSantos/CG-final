@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CG 2</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body style="background-color: rgb(40, 40, 40);">
+    <script type="text/javascript" src="dynamic_canvas.js"></script>
+    <script type="text/javascript">
+        var ammo = 5;
+    </script>
+    <div id="wrapper">
+        <canvas class="webgl" id="canvas" width="1420" height="720"></canvas>
+        <canvas class="hud" id="hud" width="1420" height="720"></canvas>
+    </div>
+
+    <script src="https://twgljs.org/dist/4.x/twgl-full.min.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/3d-math.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/primitives.js"></script>
+
+    <script type="text/javascript" src="controlpoints.js"></script>
+    <script type="text/javascript" src="camera.js"></script>
+
+    <script id="sky_vs" type="x-shader/x-fragment">
+            attribute vec4 a_position;
+
+            varying vec4 v_position;
+
+            void main() {
+                v_position = a_position;
+                gl_Position = a_position;
+                gl_Position.z = 1.0;
+            }
+        </script>
+    <script id="sky_fs" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            uniform samplerCube u_skybox;
+            uniform mat4 u_viewDirectionProjectionInverse;
+            
+            varying vec4 v_position;
+            void main() {
+                vec4 t = u_viewDirectionProjectionInverse * v_position;
+                gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
+            }
+        </script>
+    <script id="cube_vs" type="x-shader/x-vertex">
+            attribute vec4 a_position;
+            attribute vec3 a_normal;
+            
+            uniform mat4 u_matrix;
+            uniform vec3 u_lightPosition;
+            
+            varying vec3 v_normal;
+            
+            void main() {
+              gl_Position = u_matrix * a_position;
+            
+              v_normal = normalize(a_position.xyz);
+            }
+        </script>
+    <script id="cube_fs" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            varying vec3 v_normal;
+            
+            uniform samplerCube u_texture;
+            uniform vec3 u_LightPosition;
+            uniform vec3 u_CameraPosition;
+            
+            void main() {
+                vec3 cubeToBallDir = normalize(u_LightPosition - gl_FragCoord.xyz);
+                
+                vec3 cubeToCameraDir = normalize(v_normal * 2.0 + gl_FragCoord.xyz);
+                
+                vec3 lightDir = normalize(cubeToBallDir + cubeToCameraDir);
+                float lightFactor = max(dot(v_normal, lightDir), 0.2);
+            
+                vec3 cubeColor = textureCube(u_texture, normalize(v_normal)).xyz;
+                vec3 finalColor = cubeColor - lightFactor;
+            
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+            </script>
+    <script id="ball_vs" type="x-shader/x-fragment">
+            attribute vec4 a_position;
+            attribute vec4 a_color;
+
+            uniform mat4 u_matrix;
+
+            varying vec4 v_color;
+
+            void main() {
+                gl_Position = u_matrix * a_position;
+                v_color = a_color;
+            }
+        </script>
+    <script id="ball_fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            varying vec4 v_color;
+
+            uniform vec4 u_colorMult;
+
+            void main() {
+                vec3 baseColor = vec3(1, 1, 1);
+                vec3 finalColor = baseColor * v_color.rgb + 1.0;
+                gl_FragColor = vec4(finalColor, v_color.a);
+            }
+        </script>
+    <script id="envmap-vertex-shader" type="x-shader/x-fragment">
+            attribute vec4 a_position;
+            attribute vec3 a_normal;
+            
+            uniform mat4 u_projection;
+            uniform mat4 u_view;
+            uniform mat4 u_world;
+            
+            varying vec3 v_worldPosition;
+            varying vec3 v_worldNormal;
+            
+            void main() {
+                gl_Position = u_projection * u_view * u_world * a_position;
+
+                v_worldPosition = (u_world * a_position).xyz;
+                v_worldNormal = mat3(u_world) * a_normal;
+            }
+        </script>
+    <script id="envmap-fragment-shader" type="x-shader/x-fragment">
+            precision highp float;
+            
+            varying vec3 v_worldPosition;
+            varying vec3 v_worldNormal;
+            
+            uniform samplerCube u_texture;
+            uniform vec3 u_worldCameraPosition;
+            
+            void main() {
+                vec3 worldNormal = normalize(v_worldNormal);
+                vec3 eyeToSurfaceDir = normalize(v_worldPosition - u_worldCameraPosition);
+                vec3 direction = reflect(eyeToSurfaceDir,worldNormal);
+                
+                gl_FragColor = textureCube(u_texture, direction);
+            }
+        </script>
+
+    <script type="module" src="skybox.js"></script>
+    <script type="module" src="cube.js"></script>
+    <script type="module" src="ground.js"></script>
+    <script type="module" src="hud.js"></script>
+</body>
+
+</html>
