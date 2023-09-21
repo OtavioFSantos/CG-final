@@ -162,7 +162,7 @@ function run() {
       projection,
       modelView,
       u_texture: texture,
-      u_lightPosition: [200, 400, 0],
+      u_lightPosition: [200, 100, 0],
       u_viewMatrix: view,
     });
 

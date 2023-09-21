@@ -69,7 +69,6 @@ function animateCamera() {
     var currentTime = Date.now();
     t = (currentTime % animationDuration) / animationDuration;
 
-
     cameraPosition = calculatePoint(points, t);
     camera = m4.lookAt(cameraPosition, target, up);
     view = m4.inverse(camera);
