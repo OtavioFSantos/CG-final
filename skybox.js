@@ -8,19 +8,14 @@ function main() {
     return;
   }
 
-  const bgMusic = new Audio('./sounds/music.mp3');
+  const bgMusic = new Audio('./music/music.mp3');
   bgMusic.volume = 0.2;
   bgMusic.loop = true;
 
-
-  // setup GLSL programs and lookup locations
   const skyboxProgramInfo = webglUtils.createProgramInfo(
     gl, ["sky_vs", "sky_fs"]);
 
-  // create buffers and fill with vertex data
   const quadBufferInfo = primitives.createXYQuadBufferInfo(gl);
-
-  // Create a texture.
 
   gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
@@ -64,7 +59,6 @@ function main() {
     const format = gl.RGBA;
     const type = gl.UNSIGNED_BYTE;
 
-    // setup each face so it's immediately renderable
     gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
 
     const image = new Image();

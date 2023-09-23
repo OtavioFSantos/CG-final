@@ -52,15 +52,13 @@ function MouseRelease() {
 }
 
 var fov = degToRad(60);
-var cameraPosition = [-50.37529, 100, 97.62443];
+var cameraPosition = [0, 100, 10];
 var target = [0, 0, 0];
 var up = [0, 1, 0];
 var camera = m4.lookAt(cameraPosition, target, up);
 var view = m4.inverse(camera);
 var animationDuration = 20000;
 var cameraSpeed = 0.00005;
-
-var startTime = Date.now();
 
 var cameraPosition = calculatePoint(points, 0);
 var t = 0
